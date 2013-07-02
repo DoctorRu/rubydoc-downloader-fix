@@ -1,0 +1,56 @@
+# 01/07/13 - by Ilderaldo  Correa (doctorRu) - http://rubydoit.blogspot.com/
+# This script will:
+# Download, install and fix css/js and mainlinks  (except: downloads and gem links) for:
+# The 1.9.3 Base Distribution RDoc HTML
+# The 1.9.3 Standard Library RDoc HTML
+
+echo "Files will be installed inside /home/$USER/"
+echo -n "subfolder to install/" 
+read dfolder
+echo "Destination folder is /home/$USER/$dfolder"
+while true; do
+    echo "After installation you can delete but you can't move the files or you will break css and js links."
+    read -p "Continue? [y/n] " yn
+    case $yn in
+        [Yy]* ) cd ~
+            mkdir -p $dfolder
+
+			cd $dfolder
+
+			wget -U 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.6) Gecko/20070802 SeaMonkey/1.1.4'  http://ruby-doc.org/downloads/ruby_1_9_3_core_rdocs.tgz
+			wget -U 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.6) Gecko/20070802 SeaMonkey/1.1.4'  http://ruby-doc.org/downloads/ruby_1_9_3_stdlib_rdocs.tgz
+
+			tar -xvf ruby_1_9_3_stdlib_rdocs.tgz
+			tar -xvf ruby_1_9_3_core_rdocs.tgz
+
+			cp -R ruby_1_9_3_core/js ruby_1_9_3_stdlib/js
+			cp -R ruby_1_9_3_core/css ruby_1_9_3_stdlib/css
+			
+			cd ruby_1_9_3_core
+			echo "Fixing links for core docs, this will take  2 ~ 3  minutes. Don't cancel this script!"
+			find . -iname '*.html' -type f -print0 | xargs -0 -I {} sh -c 'sed -i -r 's#'"'"'/'"'"'#'"'"'file:///home/$USER/"$dfolder"/ruby_1_9_3_core/index.html'"'"'#' "{}";  sed -i -r "s#'"'"'/stdlib-1.9.3'"'"'#'"'"'file:///home/$USER/'$dfolder'/ruby_1_9_3_stdlib/index.html'"'"'#" "{}"; sed -i -r "s#'"'"'/core-1.9.3'"'"'#'"'"'file:///home/$USER/'$dfolder'/ruby_1_9_3_core/index.html'"'"'#" "{}"; sed -i -r "s#'"'"'/#'"'"'#" "{}"; sed -i -r "s#\"/#\"#" "{}"'
+
+			cd ../ruby_1_9_3_stdlib
+			echo "Fixing links for stdlib docs, this will take 15 ~ 20 minutes, a LOT of .html files to edit, Keep Calm and take a coffee."
+			find . -iname '*.html' -type f -print0 | xargs -0 -I {} sh -c 'sed -i -r 's#'"'"'/'"'"'#'"'"'file:///home/$USER/"$dfolder"/ruby_1_9_3_core/index.html'"'"'#' "{}";  sed -i -r "s#'"'"'/stdlib-1.9.3'"'"'#'"'"'file:///home/$USER/'$dfolder'/ruby_1_9_3_stdlib/index.html'"'"'#" "{}"; sed -i -r "s#'"'"'/core-1.9.3'"'"'#'"'"'file:///home/$USER/'$dfolder'/ruby_1_9_3_core/index.html'"'"'#" "{}"; sed -i -r "s#'"'"'/#'"'"'#" "{}"; sed -i -r "s#\"/#\"#" "{}"'
+
+			cd ..
+			ln -sf ruby_1_9_3_stdlib/index.html index_stdlib.html
+			ln -sf ruby_1_9_3_core/index.html index_core.html
+
+			rm -f ruby_1_9_3_core_rdocs.tgz
+			rm -f ruby_1_9_3_stdlib_rdocs.tgz
+			
+            echo
+			echo "Done!"
+			echo
+			echo "If this script was helpful please visit my blog and leave a comment!  I'll really like it ;) http://rubydoit.blogspot.com/2013/07/rubydoc-download-fix.html"
+			echo
+			echo "To view the documentation, open: index_core.html or index_stdlib.html in /home/$USER/$dfolder"
+			exit
+			;;
+        [Nn]* ) exit
+			;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
